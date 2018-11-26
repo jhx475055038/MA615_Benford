@@ -1,0 +1,32 @@
+---
+title: "Benford"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(readxl)
+library(data.table)
+library(tidyverse)
+```
+
+## R Markdown
+
+```{r}
+Census<-as.Date.numeric(read.csv("111.csv",sep=","))
+
+bfd.Census<-benford(Census)
+plot(bfd.Census)
+suspects_ranked<-getSuspects(bfd.Census,Census)
+suspects_ranked  
+
+data(census.2000_2010) #gets data
+cp <- benford(census.2000_2010$pop.2010, 2, sign="both") #generates benford object
+cp #prints
+chisq(cp)
+dfactor(cp)
+plot(cp) #plots
+head(suspectsTable(cp),10)
+
+```

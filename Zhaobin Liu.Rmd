@@ -1,0 +1,63 @@
+---
+title: "Win Share"
+author: "Zhaobin Liu"
+date: "2018 M11 26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(readr)
+library(benford.analysis)
+
+season78 <- read_csv("season78.csv")
+WS <- benford(season78$WS,number.of.digits = 2)
+plot(WS)
+# The first plot shows that our data has the tendency to follow Benford's law. The chi-Squared Difference graph also has a very good-fit shape. 
+
+WS
+
+# By the result, we can see the # of observation, # of obs for second order, and first digit analysed. The 5 largest deviations show that the smallest digit are 10 which follows the Benford's law as well. 
+
+
+head(suspectsTable(WS),10) #prints the digits by decreasing order of discrepancies
+
+#gets observations of the 2 most suspicious groups
+suspects <- getSuspects(WS, season78, how.many=2)
+suspects
+
+#prints the duplicates by decreasing order
+duplicatesTable(WS)
+
+#gets the observations of the 2 values with most duplicates
+duplicates <- getDuplicates(WS, season78,how.many=2)
+duplicates
+
+#gets the Mean Absolute Deviation and Distortion Factor from WS result
+MAD(WS)
+dfactor(WS)
+
+
+# #gets the Chi-squared test
+chisq(WS)
+
+#Shows the first digits ordered by the mains discrepancies from Benford’s Law
+suspectsTable(WS) 
+
+#basic stats
+mantissa(WS)
+  
+#Gets the Mantissa Arc test of the object
+marc(WS)
+  
+#Gets the the statistics of the first Digits of a benford object
+# getBfd(WS)
+```
+
+
+```

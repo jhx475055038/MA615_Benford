@@ -1,89 +1,111 @@
 ---
 title: "Benford"
 output: pdf_document
+author: "Angela Zhai, Zhaobin Liu, Yaotang Luo, Jiahao Xu"
+date: "November 30, 2018"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(readr)
-library(readxl)
-library(data.table)
-library(tidyverse)
-library(benford.analysis)
+pacman::p_load(readr, readxl, data.table, tidyverse, benford.analysis, knitr)
 ```
 
-## R Markdown
+# I. US 2010 Population Census Data
 
-```{r}
-
+```{r echo=FALSE}
 data(census.2000_2010) #gets data
 
 cp <- benford(census.2000_2010$pop.2010, number.of.digit=2, sign="both") #generates benford object for 2010 population Census data in U.S. 
 
-chisq_test<-chisq(cp) #Gets the Chi-squared test of a Benford object
-# Mean is the df=89 and p-value= 0.6646, fail to reject Benford's law. And the X-squared value is 82.809. Since X-squared value is near the degree of the freedom, the distribution of this data set looks good. All in all, this dataset follows Benford's law.
-chisq_test
+bfd.cp <- benford(census.2000_2010$pop.2010)
+plot(bfd.cp)
+```
+The original data is in blue and the expected frequency according to Benford's law is in red.
 
-dfactor(cp)  #Gets the Distortion Factor of a Benford object, the distortion factor is -0.781. 
+Benford’s analysis of the first digits indicate the data basically follows Benford's Law.
 
-duplicate<-duplicatesTable(cp) # Shows the duplicates of the data
-duplicate
+Digit Distribution Second Order Test calculates the digit frequencies of the differences between the ordered (ranked) values in a data set. It shows that this dataset generally follows Benford's law, except some specific two digits.
 
-Bfd<-getBfd(cp)  #Gets the the statistics of the first Digits of a benford object.
+The Chi-Square and Summation Difference plots almost fit Benford's law, but not good enough.
+
+```{r echo=FALSE}
+bfd.cp
+```
+Above result shows 5 largest discrepancies. As we can see from the plot, the highest deviation is 20.
+
+From the log mantissa of the data, we can tell that the data follows Benford's Law. Because Mean closes to 0.5, Variance closes to 0.083, Ex. Kurtosis closes to -1.2, and Skewness closes to 0.
+
+Degree of freedom equals 89 and p-value equals 0.6646, so failed to reject Benford's law. X-squared value equals 82.809 and closes to the value of degree of freedom, the distribution of this data set looks good. All in all, this dataset follows Benford's law.
+
+The distortion factor is -0.781.
+
+$~$ 
+
+$~$ 
+
+$~$ 
+
+$~$ 
+
+$~$ 
+
+$~$ 
+
+$~$ 
+```{r echo=FALSE}
+Bfd <- getBfd(cp)  #Gets the the statistics of the first Digits of a benford object.
 #From this table, we can get the distribution of dataset by first two digits.
-Bfd 
-
-cp_plot<-plot(cp) #plots
-# The first plot(Digits Distribution) shows that this data set fits Benford's law.
-# The second plot(Digit Distribution second-order test) calculates the digit frequencies of the differences between the ordered (ranked) values in a data set. It shows that this data set generally follows Benford's law, except some specific two digits like 
-# The Chi-Square and Summation Difference plots almost fit Benford's law, but not good enough.
-cp_plot
-
-# Show ten suspected two digits that contain most discrepancies from Benford's law.
-head(suspectsTable(cp),10)
-
-suspects_ranked<-getSuspects(cp,census.2000_2010) #Gets the ’suspicious’ observations according to Benford’s Law.
-suspects_ranked
-
-#basic stats
-mantissa(cp)
-  
-#Gets the Mantissa Arc test of the object
-marc(cp)
-
+kable(Bfd[1:10, 1:6])
 ```
 
-```{r}
+Table above shows the distribution of population data by first two digits.
+
+```{r echo=FALSE}
+# Show ten suspected two digits that contain most discrepancies from Benford's law.
+kable(head(suspectsTable(cp),10))
+```
+
+Above table shows ten suspected two digits that contain most discrepancies from Benford's law.
+
+```{r echo=FALSE}
+suspects_ranked <- getSuspects(cp, select(census.2000_2010, -pop.2000)) #Gets the ’suspicious’ observations according to Benford’s Law.
+kable(head(suspects_ranked, 10))
+```
+
+Table above gets the ’suspicious’ observations according to Benford’s Law. (Only shows 10 observations)
+
+$~$
+
+
+# II. NBA 2017-2018 Season Win Share
+```{r echo=FALSE, message=FALSE}
 season78 <- read_csv("season78.csv")
 WS <- benford(season78$WS,number.of.digits = 2)
 plot(WS)
-# The first plot shows that our data has the tendency to follow Benford's law. The chi-Squared Difference graph also has a very good-fit shape. 
-WS
-# By the result, we can see the # of observation, # of obs for second order, and first digit analysed. The 5 largest deviations show that the smallest digit are 10 which follows the Benford's law as well. 
-head(suspectsTable(WS),10) #prints the digits by decreasing order of discrepancies
-#gets observations of the 2 most suspicious groups
-suspects <- getSuspects(WS, season78, how.many=2)
-suspects
-#prints the duplicates by decreasing order
-duplicatesTable(WS)
-#gets the observations of the 2 values with most duplicates
-duplicates <- getDuplicates(WS, season78,how.many=2)
-duplicates
-#gets the Mean Absolute Deviation and Distortion Factor from WS result
-MAD(WS)
-dfactor(WS)
-# #gets the Chi-squared test
-chisq(WS)
-#Shows the first digits ordered by the mains discrepancies from Benford’s Law
-suspectsTable(WS) 
-#basic stats
-mantissa(WS)
-  
-#Gets the Mantissa Arc test of the object
-marc(WS)
-  
-#Gets the the statistics of the first Digits of a benford object
-# getBfd(WS)
-
-
 ```
+The first plot shows that our data has the tendency to follow Benford's law. The chi-Squared Difference graph also has a very good-fit shape. 
+
+```{r echo=FALSE}
+WS
+```
+By the result, we can see the # of observation, # of obs for second order, and first digit analysed. The 5 largest deviations show that the smallest digit are 10 which follows the Benford's law as well. 
+
+```{r echo=FALSE}
+kable(head(suspectsTable(WS),10))
+```
+
+Above table shows the digits by decreasing order of discrepancies, and gets observations of the 2 most suspicious groups.
+
+```{r echo=FALSE}
+suspects <- getSuspects(WS, season78, how.many=2)
+kable(head(suspects, 10))
+```
+
+Table above gets the ’suspicious’ observations according to Benford’s Law. (Only shows 10 observations)
+
+```{r echo=FALSE}
+#prints the duplicates by decreasing order
+kable(head(duplicatesTable(WS), 10))
+```
+
+Above table shows the duplicates by decreasing order. There are 1167 observations with the most 2 duplicates values.
